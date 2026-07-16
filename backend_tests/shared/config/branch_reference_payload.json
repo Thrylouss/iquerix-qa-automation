@@ -1,0 +1,32 @@
+{
+  "name": "QA Automation Test Branch",
+  "service_types": [
+    {
+      "id": "019d761a-4d09-7188-b64b-f2192e35bf42",
+      "service_catalog_items": [
+        {"id": "019d761a-4d0a-7944-b215-27a40425affa"},
+        {"id": "019d761a-4d2e-722c-b271-0f67a532b89e"},
+        {"id": "019d761a-4d09-746e-978c-487145565be7"}
+      ]
+    }
+  ],
+  "primary_service_type_id": "019d761a-4d09-7188-b64b-f2192e35bf42",
+  "lat": 41.33951400621209,
+  "long": 69.29027215558749,
+  "phone_number": "998222222222",
+  "schedule": {
+    "days": {
+      "monday": true,
+      "tuesday": true,
+      "wednesday": true,
+      "thursday": true,
+      "friday": true,
+      "saturday": true,
+      "sunday": false
+    },
+    "start_time": "12:00",
+    "end_time": "14:00"
+  },
+  "address": "QA Automation Test Address",
+  "images": []
+}

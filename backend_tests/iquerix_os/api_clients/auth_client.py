@@ -7,9 +7,19 @@ import requests
 
 from backend_tests.shared.http.base_client import BaseApiClient
 
+RATE_LIMIT_ERROR_CODE = "TOO_MANY_REQUESTS_WAIT_10_MINUTES"
+
 
 class OsAuthClient(BaseApiClient):
     LOGIN_PATH = "/auth/login"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Выставляется в True, как только клиент увидит фактический ответ
+        # TOO_MANY_REQUESTS_WAIT_10_MINUTES — используется conftest'ом,
+        # чтобы больше не дёргать этот номер и скипать зависящие тесты,
+        # а не заваливать их непонятными FAILED.
+        self.rate_limited: bool = False
 
     def login(
         self,
@@ -44,5 +54,19 @@ class OsAuthClient(BaseApiClient):
         # raw_body как строка/байты -> отправляем "как есть" через data (для тестов битого JSON)
         # raw_body как dict/None -> отправляем через json (requests сам сериализует и выставит content-length)
         if isinstance(raw_body, (str, bytes)):
-            return self.post(self.LOGIN_PATH, data=raw_body, headers=headers)
-        return self.post(self.LOGIN_PATH, json=body, headers=headers)
+            response = self.post(self.LOGIN_PATH, data=raw_body, headers=headers)
+        else:
+            response = self.post(self.LOGIN_PATH, json=body, headers=headers)
+
+        self._track_rate_limit(response)
+        return response
+
+    def _track_rate_limit(self, response: requests.Response) -> None:
+        if response.status_code != 403:
+            return
+        try:
+            error_code = response.json().get("error")
+        except ValueError:
+            return
+        if error_code == RATE_LIMIT_ERROR_CODE:
+            self.rate_limited = True
